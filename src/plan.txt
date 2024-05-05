@@ -30,3 +30,6 @@ Additional reqs:
     - Texture working on at least one object: 1 pts
     - Texture on some objects and color on other. Objects working together: 0.5 pts
     - Multiple textures: 1 pt.
+
+
+1. Create a new attribute variable to store UV coordinates

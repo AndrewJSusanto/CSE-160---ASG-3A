@@ -2,15 +2,25 @@ function renderAllShapes() {
     // Clear <canvas>
     var startTime = performance.now();
 
-    // Pass the matrix to u_ModelMatrix attribute
+    // Pass rotation matrices
     var globalRotMat = new Matrix4().rotate(g_globalAngle, 0, 1, 0);
     gl.uniformMatrix4fv(u_GlobalRotateMatrix, false, globalRotMat.elements);
     var globalRotMatY = new Matrix4().rotate(g_globalAngleY, 1, 0, 0);
     gl.uniformMatrix4fv(u_GlobalRotateMatrixY, false, globalRotMatY.elements);
-    var viewMat = identityM;
-    gl.uniformMatrix4fv(u_ViewMatrix, false, viewMat.elements)
-    var projMat = identityM;
+    
+    // Pass view matrix and projection matrix
+    var projMat = new Matrix4();
+    // Setting perspective as 90deg wide, near 0.1, far 100
+    // could be cool to set keybind to optical zoom w/ setPerspective
+    projMat.setPerspective(60, canvas.width / canvas.height, 0.1, 100);
     gl.uniformMatrix4fv(u_ProjectionMatrix, false, projMat.elements);
+    var viewMat = new Matrix4();
+    // (eye, pointing to, where is up)
+    viewMat.setLookAt(g_eye[0], g_eye[1], g_eye[2], 
+                      g_at[0],  g_at[1],  g_at[2], 
+                      g_up[0],  g_up[1],  g_up[2]);
+    gl.uniformMatrix4fv(u_ViewMatrix, false, viewMat.elements);
+
     // Clear depth buffer bit to prevent depth being leftover from prev. frames
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
@@ -40,7 +50,7 @@ function renderAllShapes() {
         var backendCoordMatBRS = new Matrix4(backend.matrix);
         var backendCoordMatTC = new Matrix4(backend.matrix);
         backend.matrix.rotate(3, 1, 0, 0);
-        backend.render();
+        //backend.render();
         // Tailend
         var tailcap = new Cube();
         tailcap.color = [156/255, 189/255, 238/255, 1.0];
@@ -49,7 +59,7 @@ function renderAllShapes() {
         tailcap.matrix.rotate(-5, 1, 0, 0);
         var tailcapCoordMat = new Matrix4(tailcap.matrix);
         tailcap.matrix.scale(0.9, 0.8, 0.5);
-        tailcap.render();
+        //tailcap.render();
 
         // Head
             // Skull
@@ -65,7 +75,7 @@ function renderAllShapes() {
         var headCoordMat_trunk = new Matrix4(head.matrix);
         head.matrix.scale(0.5, 0.5, 0.5);
         head.matrix.translate(-0.5, 0, -0.6);
-        head.render();
+        //head.render();
 
 
             // Ears
@@ -77,7 +87,7 @@ function renderAllShapes() {
         var earLCoordMat = new Matrix4(earL.matrix);
         earL.matrix.scale(0.2, 0.1, 0.6);
         earL.matrix.translate(-0.1, -0.5, -0.55);
-        earL.render();
+        //earL.render();
 
         var earLF = new Cube();
         earLF.color = [172/255, 213/255, 225/255, 1];
@@ -88,7 +98,7 @@ function renderAllShapes() {
         var earLFCoordMat = new Matrix4(earLF.matrix);
         earLF.matrix.scale(0.5, 0.125, 0.8);
         earLF.matrix.translate(0.1, -0.25, -0.55);
-        earLF.render();
+        //earLF.render();
 
         var earLF2 = new Cube();
         earLF2.color = [200/255, 106/255, 82/255, 1];
@@ -97,7 +107,7 @@ function renderAllShapes() {
         earLF2.matrix.rotate(-g_earAngle * 0.2, 0, 0, 1);
         earLF2.matrix.scale(0.3, 0.08, 0.70);
         earLF2.matrix.translate(0.1, -0.3, -0.55);
-        earLF2.render();
+        //earLF2.render();
 
         var earR = new Cube();
         earR.color = [172/255, 213/255, 225/255, 1];
@@ -107,7 +117,7 @@ function renderAllShapes() {
         var earRCoordMat = new Matrix4(earR.matrix);
         earR.matrix.scale(0.2, 0.1, 0.6);
         earR.matrix.translate(-1.1, -0.5, -0.55);
-        earR.render();
+        //earR.render();
 
         var earRF = new Cube();
         earRF.color = [172/255, 213/255, 225/255, 1];
@@ -118,7 +128,7 @@ function renderAllShapes() {
         var earRFCoordMat = new Matrix4(earRF.matrix);
         earRF.matrix.scale(0.5, 0.125, 0.8);
         earRF.matrix.translate(-1.1, -0.25, -0.55);
-        earRF.render();
+        //earRF.render();
         
 
         var earRF2 = new Cube();
@@ -128,7 +138,7 @@ function renderAllShapes() {
         earRF2.matrix.rotate(g_earAngle * 0.2, 0, 0, 1);
         earRF2.matrix.scale(0.3, 0.08, 0.7);
         earRF2.matrix.translate(-1.1, -0.3, -0.55);
-        earRF2.render();
+        // earRF2.render();
 
             // Eyes
         var eyeL = new Cube();
@@ -138,7 +148,7 @@ function renderAllShapes() {
         eyeL.matrix.scale(0.05, 0.09, 0.3);
         eyeL.matrix.translate(-0.5, 0, -1.1);
         var eyeLCoordMat_glint = new Matrix4(eyeL.matrix);
-        eyeL.render();
+        // eyeL.render();
 
         var eyeLG = new Cube();
         eyeLG.color = [1, 1, 1, 1];
@@ -146,7 +156,7 @@ function renderAllShapes() {
         eyeLG.matrix.translate(0.7, 0.5, 0.03);
         eyeLG.matrix.scale(0.3, 0.3, 0.1);
         eyeLG.matrix.translate(-0.5, 0, -0.5);
-        eyeLG.render();
+        // eyeLG.render();
 
         var eyeR = new Cube();
         eyeR.color = [0, 0, 0, 1];
@@ -155,7 +165,7 @@ function renderAllShapes() {
         eyeR.matrix.scale(0.05, 0.09, 0.3);
         eyeR.matrix.translate(-0.5, 0, -1.1);
         var eyeRCoordMat_glint = new Matrix4(eyeR.matrix);
-        eyeR.render();
+        // eyeR.render();
 
         var eyeRG = new Cube();
         eyeRG.color = [1, 1, 1, 1];
@@ -163,7 +173,7 @@ function renderAllShapes() {
         eyeRG.matrix.translate(0.7, 0.5, 0.03);
         eyeRG.matrix.scale(0.3, 0.3, 0.1);
         eyeRG.matrix.translate(-0.5, 0, -0.5)
-        eyeRG.render();
+        // eyeRG.render();
 
             // Trunk: animate trunk
         var trunk = new Cube();
@@ -176,7 +186,7 @@ function renderAllShapes() {
         var trunk1CoordMat = new Matrix4(trunk.matrix);
         trunk.matrix.scale(0.4, 0.2, 0.2);
         trunk.matrix.translate(-0.5, -0.5, -0.5);
-        trunk.render();
+        // trunk.render();
 
         var trunk2 = new Cube();
         trunk2.color = [172/255, 213/255, 238/255, 1.0];
@@ -189,7 +199,7 @@ function renderAllShapes() {
         trunk2.matrix.translate(0, 0, 0);
         trunk2.matrix.scale(0.35, 0.18, 0.4);
         trunk2.matrix.translate(-0.5, -0.5, -0.85);
-        trunk2.render();
+        // trunk2.render();
 
         var trunkTint = new Cube();
         trunkTint.color = [246/255, 106/255, 82/255, 1];
@@ -197,7 +207,7 @@ function renderAllShapes() {
         trunkTint.matrix.translate(0, 0.09, -0.2);
         trunkTint.matrix.scale(0.36, 0.05, 0.1);
         trunkTint.matrix.translate(-0.5, -0.5, -0.5);
-        trunkTint.render();
+        // trunkTint.render();
 
         var trunk3 = new Cube();
         trunk3.color = [90/255, 100/255, 100/255, 1.0];
@@ -207,7 +217,7 @@ function renderAllShapes() {
         trunk3.matrix.rotate(g_trunk3Angle, 1, 0, 0);
         trunk3.matrix.scale(0.3, 0.12, 0.15);
         trunk3.matrix.translate(-0.5, -0.5, -0.85);
-        trunk3.render();
+        // trunk3.render();
 
         // Front legs
             // Front left - shoulder
@@ -222,7 +232,7 @@ function renderAllShapes() {
         var legFLS_CoordMat = new Matrix4(legFLS.matrix);
         legFLS.matrix.translate(-0.05, -0.1, 0);
         legFLS.matrix.scale(0.15, 0.35, 0.3);
-        legFLS.render();
+        // legFLS.render();
             // Front left - middle
         var legFLM = new Cube();
         legFLM.color = [156/255, 189/255, 238/255, 1.0];
@@ -231,14 +241,14 @@ function renderAllShapes() {
         legFLM.matrix.rotate(2, 1, 0, 0);
         legFLM.matrix.scale(0.175, 0.2, 0.35);
         var legFLM_CoordMat = new Matrix4(legFLM.matrix);
-        legFLM.render();
+        // legFLM.render();
             // Front left - toe
         var legFLT = new Cube();
         legFLT.color = [106/255, 115/255, 115/255, 1];
         legFLT.matrix = legFLM_CoordMat;
         legFLT.matrix.translate(-0.1, 1, -0.1);
         legFLT.matrix.scale(1.25, 0.5, 1.1);
-        legFLT.render();
+        // legFLT.render();
 
             // Front right - shoulder
         var legFRS = new Cube();
@@ -252,7 +262,7 @@ function renderAllShapes() {
         legFRS_CoordMat = new Matrix4(legFRS.matrix);
         legFRS.matrix.translate(-0.05, -0.1, 0);
         legFRS.matrix.scale(0.15, 0.35, 0.3);
-        legFRS.render();
+        // legFRS.render();
             // Front right - middle
         var legFRM = new Cube();
         legFRM.color = [156/255, 189/255, 238/255, 1.0];
@@ -261,14 +271,14 @@ function renderAllShapes() {
         legFRM.matrix.rotate(2, 1, 0, 0);
         legFRM.matrix.scale(0.175, 0.2, 0.35);
         var legFRM_CoordMat = new Matrix4(legFRM.matrix);
-        legFRM.render();
+        // legFRM.render();
             // Front right - toe
         var legFRT = new Cube();
         legFRT.color = [106/255, 115/255, 115/255, 1];
         legFRT.matrix = legFRM_CoordMat;
         legFRT.matrix.translate(-0.1, 1, -0.1);
         legFRT.matrix.scale(1.25, 0.5, 1.1);
-        legFRT.render();
+        // legFRT.render();
 
         // Back legs
             // Back left - shoulder (?)
@@ -281,7 +291,7 @@ function renderAllShapes() {
         legBLS.matrix.rotate(180, 0, 0, 1);
         legBLS.matrix.translate(-0.1, 0, 0);
         legBLS.matrix.scale(0.4, 0.7, 0.9);
-        legBLS.render();
+        // legBLS.render();
             // Back left - middle
         var legBLM = new Cube();
         legBLM.color = [156/255, 189/255, 238/255, 1.0];
@@ -290,14 +300,14 @@ function renderAllShapes() {
         var legBLMCoordMat = new Matrix4(legBLM.matrix);
         legBLM.matrix.scale(0.5, 0.8, 1.1);
         legBLM.matrix.translate(-0.7, -1.2, -0.1);
-        legBLM.render();
+        // legBLM.render();
             // Back left - toe
         var legBLT = new Cube();
         legBLT.color = [106/255, 115/255, 115/255, 1];
         legBLT.matrix = legBLMCoordMat;
         legBLT.matrix.translate(-0.4, -1.2, -0.15);
         legBLT.matrix.scale(0.6, 0.5, 1.2);
-        legBLT.render();
+        // legBLT.render();
 
             // Back right - shoulder (?)
         var legBRS = new Cube();
@@ -309,7 +319,7 @@ function renderAllShapes() {
         legBRS.matrix.rotate(180, 0, 0, 1);
         legBRS.matrix.translate(-0.3, 0, 0);
         legBRS.matrix.scale(0.4, 0.7, 0.9);
-        legBRS.render();
+        // legBRS.render();
             // Back right - middle
         var legBRM = new Cube();
         legBRM.color = [156/255, 189/255, 238/255, 1.0];
@@ -318,14 +328,14 @@ function renderAllShapes() {
         var legBRMCoordMat = new Matrix4(legBRM.matrix);
         legBRM.matrix.scale(0.5, 0.8, 1.1);
         legBRM.matrix.translate(-0.3, -1.2, -0.1);
-        legBRM.render();
+        // legBRM.render();
             // Back right - toe
         var legBRT = new Cube();
         legBRT.color = [106/255, 115/255, 115/255, 1];
         legBRT.matrix = legBRMCoordMat;
         legBRT.matrix.translate(-0.2, -1.2, -0.15);
         legBRT.matrix.scale(0.6, 0.5, 1.2);
-        legBRT.render();
+        // legBRT.render();
 
 
 
@@ -340,7 +350,7 @@ function renderAllShapes() {
         var tailCoordMat = new Matrix4(tail.matrix);
         tail.matrix.scale(0.06, -1.0, 0.1);
         tail.matrix.translate(-0.5, 0, 5);
-        tail.render();
+        // tail.render();
 
         var tailEnd = new Cube();
         tailEnd.color = [246/255, 106/255, 82/255, 1];
@@ -348,7 +358,7 @@ function renderAllShapes() {
         tailEnd.matrix.translate(0, -1, 0.55);
         tailEnd.matrix.scale(0.15, 0.15, 0.15);
         tailEnd.matrix.translate(-0.5, -0.5, -0.5);
-        tailEnd.render();
+        // tailEnd.render();
 
 
 

@@ -21,9 +21,26 @@ var FSHADER_SOURCE = `
   precision mediump float;
   varying vec2 v_UV;
   uniform vec4 u_FragColor;
+  uniform sampler2D u_Sampler0;
+  uniform int u_whichTexture;
   void main() {
-    gl_FragColor = u_FragColor;
-    gl_FragColor = vec4(v_UV, 1.0, 1.0);
+
+    if (u_whichTexture == -2) {
+        gl_FragColor = u_FragColor; // use color
+    }
+    else if (u_whichTexture == -1) {
+        gl_FragColor = vec4(v_UV, 1.0, 1.0); // use uv debug color
+    }
+    else if (u_whichTexture == 0) {
+        gl_FragColor = texture2D(u_Sampler0, v_UV); // use texture0
+    }
+    else {
+        gl_FragColor = vec4(1, 0.2, 0.2, 1); // error put a reddish color
+    }
+
+    // gl_FragColor = u_FragColor;
+    // gl_FragColor = vec4(v_UV, 1.0, 1.0);
+    // gl_FragColor = texture2D(u_Sampler0, v_UV);
   }`
 
 // Global Variables
@@ -34,16 +51,27 @@ let a_UV;
 let u_FragColor;
 let u_Size;
 let u_ModelMatrix;
-let u_ProjectionMatrix;
-let u_ViewMatrix;
+let u_ProjectionMatrix; // eventually set by glPerspective()
+let u_ViewMatrix; // eventually set by lookAt()
+
 let u_GlobalRotateMatrix;
 let u_GlobalRotateMatrixY;
+
+let u_Sampler0;
+let u_whichTexture;
 let identityM;
 
 let cursorPosition = [0, 0];
+
+// camera rotation
 let g_globalAngle = 0;
 let g_globalAngleY = 0;
 let g_globalRot = 0;
+
+// perspective
+let g_eye = [0, 0, -3];
+let g_at = [0, 0, 100];
+let g_up = [0, 1, 0];
 
 //
 let idleAnimate = false;
@@ -136,11 +164,21 @@ function connectVariablesToGLSL() {
         return;
     }
 
+    u_Sampler0 = gl.getUniformLocation(gl.program, 'u_Sampler0');
+    if (!u_Sampler0) {
+        console.log('Failed to get the storage location of u_Sampler0');
+        return;
+    }
+
+    u_whichTexture = gl.getUniformLocation(gl.program, 'u_whichTexture');
+    if (!u_whichTexture) {
+        console.log('Failed to get the storage location of u_whichTexture');
+        return;
+    }
+
     identityM = new Matrix4();
     gl.uniformMatrix4fv(u_ModelMatrix, false, identityM.elements);
 }
-
-
 
 function addActionsForHTMLUI() {
     // Mouse rotation
@@ -272,6 +310,57 @@ function addActionsForHTMLUI() {
 
 }
 
+function initTextures() {
+    // initTextures + sendTextoGLSL takes a gl context, creates a texture, gets location...
+    // of uniform variable, initializes the image object...
+    // sets up an event handler on image load for texture generation (runs after load)
+
+    var image = new Image();
+    if (!image) {
+        console.log('Failed to create the image object');
+        return false;
+    }
+    
+    // Register the event handler to be called on loading an image
+    // 'whenever done loading image, run sendTextureToGLSL to be rendered
+    image.onload = function() { sendImageToTEXTURE0(image); }
+    // Tell the browser to load image
+    image.src = '../res/img/sky.jpg';
+
+    // add other texture loaders if desired
+
+    //
+
+    return true;
+}
+
+function sendImageToTEXTURE0(image) {
+    // creates texture that connects to GL object
+    var texture = gl.createTexture();
+    if (!texture) {
+        console.log('Failed to create the texture object');
+        return false;
+    }
+
+    // Flip image's y axis to align with canvas
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
+    // Enable texture unit0
+    gl.activeTexture(gl.TEXTURE0);
+    // Bind the texture object to the target
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+
+    // Set the texture parameters
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    // Set the texture image
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
+
+    // Set the texture unit 0 to the sampler
+    gl.uniform1i(u_Sampler0, 0);
+
+
+    console.log('complete');
+}
+
 function main() {
     // Set up canvas and gl variables
     setupWebGL();
@@ -280,6 +369,9 @@ function main() {
 
     // Button and Sliders
     addActionsForHTMLUI();
+
+    // Initialize and load textures
+    initTextures();
 
     // Specify the color for clearing <canvas>
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
@@ -314,40 +406,6 @@ function tick() {
 function renderScene() {
     renderAllShapes();
 }
-
-// function renderAllShapes() {
-//     console.log("renderAllShapes called");
-//     var startTime = performance.now();
-
-//     var globalRotMat = new Matrix4().rotate(g_globalAngle, 0, 1, 0);
-//     gl.uniformMatrix4fv(u_GlobalRotateMatrix, false, globalRotMat.elements);
-//     var viewMat = identityM;
-//     gl.uniformMatrix4fv(u_ViewMatrix, false, viewMat.elements)
-//     var projMat = identityM;
-//     gl.uniformMatrix4fv(u_ProjectionMatrix, false, projMat.elements);
-
-//     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
-//     var body = new Cube();
-//     body.color = [1, 0, 0, 1];
-//     body.matrix.translate(-.25, -.5, 0.0);
-//     body.matrix.scale(0.5, 1, .5);
-//     body.render();
-
-//     var leftArm = new Cube();
-//     leftArm.color = [1, 1, 0, 1];
-//     leftArm.matrix.translate(0.7, 0, 0.0);
-//     leftArm.matrix.rotate(45, 0, 0, 1);
-//     leftArm.matrix.scale(0.25, 0.7, 0.5);
-//     leftArm.render();
-
-//     var duration = performance.now() - startTime;
-//     sendTextToHTML(" ms: " + Math.floor(duration) +
-//                     " fps: " + Math.floor(10000/duration),
-//                     "numdot");
-
-
-// }
 
 function animate() {
     if(idleAnimate) {
@@ -407,4 +465,19 @@ function sendTextToHTML(text, htmlID) {
         return;
     }
     htmlElement.innerHTML = text;
+}
+
+function m_left(){
+    // vector delta with origin g_eye and end -> orthogonal through crossproduct of delta 
+    // delta = at - eye
+    // up = 
+    // left = crossproduct of delta and up
+}
+
+function m_right(){
+
+}
+
+function m_back(){
+
 }
