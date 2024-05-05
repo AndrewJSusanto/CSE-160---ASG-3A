@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Andrew Susanto - ASG 3A</title>
+  </head>
+
+  <body onload="main()">
+    <canvas id="webgl" width="400" height="400" style="float:left">
+    Please use a browser that supports "canvas"
+    </canvas>
+    <br>
+    <div style="height: calc(100vh - 50px); padding-right: 50px">
+      <p id="numdot"> numdot 0 ms: 0 fps: 0</p>
+      <br>
+      
+      <p>
+        Camera Angle X: <label id="angleValue"> 0 </label>
+      </p>
+      <br>
+    </div>
+     
+    <script src="../lib/webgl-utils.js"></script>
+    <script src="../lib/webgl-debug.js"></script>
+    <script src="../lib/cuon-utils.js"></script>
+    <script src="../lib/cuon-matrix.js"></script>
+    <script src="Point.js"></script>
+    <script src="Triangle.js"></script>
+    <script src="Circle.js"></script>
+    <script src="Cube.js"></script>
+    <script src="World.js"></script>
+  </body>
+</html>
