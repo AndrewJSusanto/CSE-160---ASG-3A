@@ -1,0 +1,32 @@
+Objectives:
+    - Create a virtual world using textured cubes
+    - Perspective camera with movement
+
+
+First person camera (user) starts in a given position within a 32x32x4 voxel based 3D world.
+User navigates using the keyboard and/or mouse to move and rotate camera
+    - World fully generated on application start
+    - Ground created with a large plane (square) or top of a scaled cube
+    - Walls are created with cubes
+        - Walls have varying heights in units (1, 2 cubes, etc)
+        - Faces of the cubes should be textured to appear as a Walls
+    - Sky is created with a very large blue cube that is placed at the center of the world
+    - World layout should be specified using a hardcoded javascript 2D array
+        - Each element of the array represents height of the wall placed at that location
+            - ie. at [1][2] the value is 3 -> A wall of height 3 is at [1][2]
+    - Camera controled by keyboard
+        - WASD controls with QE turning
+Additional reqs:
+    - Camera mouse control 
+    - Add multiple textures
+    - Simple adding and deleting blocks on cursor
+    - Add animals to the world 
+    - Change ground plane from flat to a terrain mapping OR get obj loader working
+    - Add a story/game to the world
+
+
+3A Portion:
+    - Have ground created with a flattened cube and sky from a big cube: 0.5 pts
+    - Texture working on at least one object: 1 pts
+    - Texture on some objects and color on other. Objects working together: 0.5 pts
+    - Multiple textures: 1 pt.
