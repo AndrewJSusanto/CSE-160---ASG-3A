@@ -13,10 +13,46 @@
     <div style="height: calc(100vh - 50px); padding-right: 50px">
       <p id="numdot"> numdot 0 ms: 0 fps: 0</p>
       <br>
-      
+      <p>Current Animation: <label id="currentAnimation">None</label></p>
+      <div id="wrapper">
+        <button type="button" id="idleButton" onclick="currentAnimation.innerText = this.innerText">Idle Animation</button>
+        <button type="button" id="flapButton" onclick="currentAnimation.innerText = this.innerText">Flying Animation</button>
+        <button type="button" id="clearButton" onclick="currentAnimation.innerText = 'None'">Clear Animations | Reset Sliders</button>
+      </div>
+      <p>
+        <p id="elephName">Smarto the Elephant.</p>
+        Shift-click on the canvas for a secret animation!
+      </p>
       <p>
         Camera Angle X: <label id="angleValue"> 0 </label>
+        <br>
+        Camera Angle Y: <label id="angleValueY"> 0 </label>
       </p>
+      <p> Clear animations before adjusting any of the options below to prevent irregular movement.</p>
+      <form id="sliderForm">
+        <p>
+          Legs <input type="range" min="-50" max="50" value="-10" class="slider" id="legSlider">
+        </p>
+        <p>
+          Ears <input type="range" min="-50" max="50" value="40" class="slider" id="earSlider">
+        </p>
+        <p>
+          Trunk Whole <input type="range" min="-50" max="50" value="-20" class="slider" id="trunkSlider">
+        </p>
+        <p>
+          Trunk Segment 1 <input type="range" min="-50" max="50" value="-3" class="slider" id="trunk1Slider">
+        <br>
+          Trunk Segment 2 <input type="range" min="-50" max="50" value="-3" class="slider" id="trunk2Slider">
+        <br>
+          Trunk Segment 3 <input type="range" min="-50" max="50" value="-3" class="slider" id="trunk3Slider">
+        </p>
+        <p>
+          Tail <input type="range" min="-50" max="50" value="0" class="slider" id="tailSlider">
+        </p>
+        <p>
+          Head <input type="range" min="-50" max="50" value="0" class="slider" id="headSlider">
+        </p>
+      </form>
       <br>
     </div>
      
@@ -28,6 +64,7 @@
     <script src="Triangle.js"></script>
     <script src="Circle.js"></script>
     <script src="Cube.js"></script>
+    <script src="build.js"></script>
     <script src="World.js"></script>
   </body>
 </html>
