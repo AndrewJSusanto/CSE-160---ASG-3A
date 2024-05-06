@@ -6,13 +6,12 @@
   </head>
 
   <body onload="main()">
-    <canvas id="webgl" width="400" height="400" style="float:left">
+    <canvas id="webgl" width="450" height="450" style="float:left">
     Please use a browser that supports "canvas"
     </canvas>
     <br>
-    <div style="height: calc(100vh - 50px); padding-right: 50px">
+    <div style="float: right; height: calc(100vh - 50px); padding-right: 50px">
       <p id="numdot"> numdot 0 ms: 0 fps: 0</p>
-      <br>
       <p>Current Animation: <label id="currentAnimation">None</label></p>
       <div id="wrapper">
         <button type="button" id="idleButton" onclick="currentAnimation.innerText = this.innerText">Idle Animation</button>
@@ -20,16 +19,13 @@
         <button type="button" id="clearButton" onclick="currentAnimation.innerText = 'None'">Clear Animations | Reset Sliders</button>
       </div>
       <p>
-        <p id="elephName">Smarto the Elephant.</p>
-        Shift-click on the canvas for a secret animation!
-      </p>
-      <p>
         Camera Angle X: <label id="angleValue"> 0 </label>
         <br>
         Camera Angle Y: <label id="angleValueY"> 0 </label>
       </p>
-      <p> Clear animations before adjusting any of the options below to prevent irregular movement.</p>
-      <form id="sliderForm">
+      <p>Mousedown and Drag to rotate camera<br>WASD or Arrowkeys to move, Q and E to pan left and right, respectively.</p>
+      <!-- <p> Clear animations before adjusting any of the options below to prevent irregular movement.</p> -->
+      <!-- <form id="sliderForm">
         <p>
           Legs <input type="range" min="-50" max="50" value="-10" class="slider" id="legSlider">
         </p>
@@ -52,19 +48,20 @@
         <p>
           Head <input type="range" min="-50" max="50" value="0" class="slider" id="headSlider">
         </p>
-      </form>
+      </form> -->
       <br>
     </div>
      
     <script src="../lib/webgl-utils.js"></script>
     <script src="../lib/webgl-debug.js"></script>
     <script src="../lib/cuon-utils.js"></script>
-    <script src="../lib/cuon-matrix.js"></script>
+    <script src="../lib/cuon-matrix-cse160.js"></script>
     <script src="Point.js"></script>
     <script src="Triangle.js"></script>
     <script src="Circle.js"></script>
     <script src="Cube.js"></script>
     <script src="build.js"></script>
     <script src="World.js"></script>
+    <script src="Camera.js"></script>
   </body>
 </html>

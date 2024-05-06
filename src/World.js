@@ -22,6 +22,8 @@ var FSHADER_SOURCE = `
   varying vec2 v_UV;
   uniform vec4 u_FragColor;
   uniform sampler2D u_Sampler0;
+  uniform sampler2D u_Sampler1;
+  uniform sampler2D u_Sampler2;
   uniform int u_whichTexture;
   void main() {
 
@@ -34,13 +36,15 @@ var FSHADER_SOURCE = `
     else if (u_whichTexture == 0) {
         gl_FragColor = texture2D(u_Sampler0, v_UV); // use texture0
     }
+    else if (u_whichTexture == 1) {
+        gl_FragColor = texture2D(u_Sampler1, v_UV); // use texture1
+    }
+    else if (u_whichTexture == 2) {
+        gl_FragColor = texture2D(u_Sampler2, v_UV); // use texture2
+    }
     else {
         gl_FragColor = vec4(1, 0.2, 0.2, 1); // error put a reddish color
     }
-
-    // gl_FragColor = u_FragColor;
-    // gl_FragColor = vec4(v_UV, 1.0, 1.0);
-    // gl_FragColor = texture2D(u_Sampler0, v_UV);
   }`
 
 // Global Variables
@@ -58,6 +62,8 @@ let u_GlobalRotateMatrix;
 let u_GlobalRotateMatrixY;
 
 let u_Sampler0;
+let u_Sampler1;
+let u_Sampler2;
 let u_whichTexture;
 let identityM;
 
@@ -69,12 +75,10 @@ let g_globalAngleY = 0;
 let g_globalRot = 0;
 
 // perspective
-let g_eye = [0, 0, -3];
-let g_at = [0, 0, 100];
-let g_up = [0, 1, 0];
+let g_camera;
 
-//
-let idleAnimate = false;
+// block animal
+let idleAnimate = true;
 let flapAnimate = false;
 let spinAnimate = false;
 let g_legAngle = -10;
@@ -170,6 +174,18 @@ function connectVariablesToGLSL() {
         return;
     }
 
+    u_Sampler1 = gl.getUniformLocation(gl.program, 'u_Sampler1');
+    if (!u_Sampler1) {
+        console.log('Failed to get the storage location of u_Sampler1');
+        return;
+    }
+
+    u_Sampler2 = gl.getUniformLocation(gl.program, 'u_Sampler2');
+    if (!u_Sampler2) {
+        console.log('Failed to get the storage location of u_Sampler2');
+        return;
+    }
+
     u_whichTexture = gl.getUniformLocation(gl.program, 'u_whichTexture');
     if (!u_whichTexture) {
         console.log('Failed to get the storage location of u_whichTexture');
@@ -217,7 +233,7 @@ function addActionsForHTMLUI() {
             newpos = convertCoordinatesEventToGL(move);
             dx = newpos[0] - currpos.x;
             dy = newpos[1] - currpos.y;
-            g_globalAngle -= (dx * delta);
+            g_globalAngle += (dx * delta);
             g_globalAngleY += (dy * delta);
             currpos.x = newpos[0];
             currpos.y = newpos[1];
@@ -238,33 +254,33 @@ function addActionsForHTMLUI() {
     })
 
 
-    // Leg Segment Slider
-    document.getElementById('legSlider').addEventListener('mousemove',
-        function() {g_legAngle = this.value; renderAllShapes(); });
+    // // Leg Segment Slider
+    // document.getElementById('legSlider').addEventListener('mousemove',
+    //     function() {g_legAngle = this.value; renderAllShapes(); });
 
-    // Ear Segment Slider
-    document.getElementById('earSlider').addEventListener('mousemove',
-        function() {g_earAngle = this.value; renderAllShapes(); })
+    // // Ear Segment Slider
+    // document.getElementById('earSlider').addEventListener('mousemove',
+    //     function() {g_earAngle = this.value; renderAllShapes(); })
 
-    // Trunk Whole Slider
-    document.getElementById('trunkSlider').addEventListener('mousemove',
-        function() {g_trunkAngle = this.value; renderAllShapes(); })
+    // // Trunk Whole Slider
+    // document.getElementById('trunkSlider').addEventListener('mousemove',
+    //     function() {g_trunkAngle = this.value; renderAllShapes(); })
 
-    // Trunk Segments Sliders
-    document.getElementById('trunk1Slider').addEventListener('mousemove',
-        function() {g_trunk1Angle = this.value; renderAllShapes(); })
-    document.getElementById('trunk2Slider').addEventListener('mousemove',
-        function() {g_trunk2Angle = this.value; renderAllShapes(); })
-    document.getElementById('trunk3Slider').addEventListener('mousemove',
-        function() {g_trunk3Angle = this.value; renderAllShapes(); })
+    // // Trunk Segments Sliders
+    // document.getElementById('trunk1Slider').addEventListener('mousemove',
+    //     function() {g_trunk1Angle = this.value; renderAllShapes(); })
+    // document.getElementById('trunk2Slider').addEventListener('mousemove',
+    //     function() {g_trunk2Angle = this.value; renderAllShapes(); })
+    // document.getElementById('trunk3Slider').addEventListener('mousemove',
+    //     function() {g_trunk3Angle = this.value; renderAllShapes(); })
 
-    // Tail Slider
-    document.getElementById('tailSlider').addEventListener('mousemove',
-        function() {g_tailAngle = this.value; renderAllShapes(); })
+    // // Tail Slider
+    // document.getElementById('tailSlider').addEventListener('mousemove',
+    //     function() {g_tailAngle = this.value; renderAllShapes(); })
 
-    // Head Segment Slider
-    document.getElementById('headSlider').addEventListener('mousemove',
-        function() {g_headAngle = this.value; renderAllShapes(); })
+    // // Head Segment Slider
+    // document.getElementById('headSlider').addEventListener('mousemove',
+    //     function() {g_headAngle = this.value; renderAllShapes(); })
 
     // Buttons
     // idleButton
@@ -296,7 +312,7 @@ function addActionsForHTMLUI() {
         spinAnimate = false;
 
         g_legAngle = -10;
-        g_earAngle = 15;
+        g_earAngle = 40;
         g_trunkAngle = -20;
         g_tailAngle = 0;
         g_headAngle = 0;
@@ -305,31 +321,78 @@ function addActionsForHTMLUI() {
         g_trunk2Angle = -3;
         g_trunk3Angle = -3;
             // leg, ear trunk, t1, t2, t3, tail, head, 
-        document.getElementById('sliderForm').reset();
+        if(document.getElementById('sliderForm')) {
+            document.getElementById('sliderForm').reset();
+        }
     })
 
 }
 
+function keydown(ev) {
+
+    switch (ev.keyCode) {
+        case 87: // W
+        case 38: // Up-arrow
+            g_camera.m_forward();
+            console.log('up');
+            break;
+        case 65: // A
+        case 37: // Left-arrow
+            g_camera.m_left();
+            break;
+        case 83: // S
+        case 40: // Down-arrow
+            g_camera.m_backward();
+            break;
+        case 68: // D
+        case 39: // Right-arrow
+            g_camera.m_right();
+            break;
+        case 81: // Q
+            g_camera.m_panLeft();
+            break;
+        case 69: // E
+            g_camera.m_panRight();
+            break;
+        default:
+            break;
+
+    }
+    renderScene();
+    console.log(ev.keyCode);
+}
 function initTextures() {
     // initTextures + sendTextoGLSL takes a gl context, creates a texture, gets location...
     // of uniform variable, initializes the image object...
     // sets up an event handler on image load for texture generation (runs after load)
 
-    var image = new Image();
-    if (!image) {
-        console.log('Failed to create the image object');
+    var skybox = new Image();
+    if (!skybox) {
+        console.log('Failed to create the skybox object');
         return false;
     }
-    
     // Register the event handler to be called on loading an image
     // 'whenever done loading image, run sendTextureToGLSL to be rendered
-    image.onload = function() { sendImageToTEXTURE0(image); }
+    skybox.onload = function() { sendImageToTEXTURE0(skybox); };
     // Tell the browser to load image
-    image.src = '../res/img/sky.jpg';
+    skybox.src = '../res/img/sky.jpg';
 
-    // add other texture loaders if desired
+    var grass = new Image();
+    if (!grass) {
+        console.log('Failed to create the grass object');
+        return false;
+    }
+    grass.onload = function() { sendImageToTEXTURE1(grass); };
+    grass.src = '../res/img/grass.jpg';
+    
+    var diamond = new Image();
+    if (!diamond) {
+        console.log('Failed to create the diamodn object');
+        return false;
+    }
+    diamond.onload = function() { sendImageToTEXTURE2(diamond); };
+    diamond.src = '../res/img/diamond.jpg';
 
-    //
 
     return true;
 }
@@ -351,11 +414,66 @@ function sendImageToTEXTURE0(image) {
 
     // Set the texture parameters
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-    // Set the texture image
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
 
     // Set the texture unit 0 to the sampler
     gl.uniform1i(u_Sampler0, 0);
+
+
+    console.log('complete');
+}
+
+function sendImageToTEXTURE1(image) {
+    // creates texture that connects to GL object
+    var texture = gl.createTexture();
+    if (!texture) {
+        console.log('Failed to create the texture object');
+        return false;
+    }
+
+    // Flip image's y axis to align with canvas
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
+    // Enable texture unit0
+    gl.activeTexture(gl.TEXTURE1);
+    // Bind the texture object to the target
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+
+    // Set the texture parameters
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
+
+    // Set the texture unit 0 to the sampler
+    gl.uniform1i(u_Sampler1, 1);
+
+
+    console.log('complete');
+}
+
+function sendImageToTEXTURE2(image) {
+    // creates texture that connects to GL object
+    var texture = gl.createTexture();
+    if (!texture) {
+        console.log('Failed to create the texture object');
+        return false;
+    }
+
+    // Flip image's y axis to align with canvas
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
+    // Enable texture unit0
+    gl.activeTexture(gl.TEXTURE2);
+    // Bind the texture object to the target
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+
+    // Set the texture parameters
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
+
+    // Set the texture unit 0 to the sampler
+    gl.uniform1i(u_Sampler2, 2);
 
 
     console.log('complete');
@@ -366,9 +484,10 @@ function main() {
     setupWebGL();
     // Set up GLSL shader programs and connect GLSL variables
     connectVariablesToGLSL();
-
-    // Button and Sliders
     addActionsForHTMLUI();
+
+    g_camera = new Camera();
+    document.onkeydown = keydown;
 
     // Initialize and load textures
     initTextures();
@@ -404,7 +523,36 @@ function tick() {
 }
 
 function renderScene() {
+    // Pass rotation matrices
+    var globalRotMat = new Matrix4().rotate(g_globalAngle, 0, 1, 0);
+    gl.uniformMatrix4fv(u_GlobalRotateMatrix, false, globalRotMat.elements);
+    var globalRotMatY = new Matrix4().rotate(g_globalAngleY, 1, 0, 0);
+    gl.uniformMatrix4fv(u_GlobalRotateMatrixY, false, globalRotMatY.elements);
+    
+    // Pass view matrix and projection matrix
+    var projMat = g_camera.projMat;
+    // Setting perspective as 90deg wide, near 0.1, far 100
+    // could be cool to set keybind to optical zoom w/ setPerspective
+    // projMat.setPerspective(60, canvas.width / canvas.height, 0.1, 100);
+    gl.uniformMatrix4fv(u_ProjectionMatrix, false, projMat.elements);
+    var viewMat = g_camera.viewMat;
+    // (eye, pointing to, where is up)
+    // viewMat.setLookAt(g_eye[0], g_eye[1], g_eye[2], 
+    //                   g_at[0],  g_at[1],  g_at[2], 
+    //                   g_up[0],  g_up[1],  g_up[2]);
+    gl.uniformMatrix4fv(u_ViewMatrix, false, viewMat.elements);
+
+    // Clear depth buffer bit to prevent depth being leftover from prev. frames
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+    var startTime = performance.now();
+
     renderAllShapes();
+
+    var duration = performance.now() - startTime;
+    sendTextToHTML(" ms: " + Math.floor(duration) +
+                    " fps: " + Math.floor(1000/duration),
+                    "numdot");
 }
 
 function animate() {
@@ -465,19 +613,4 @@ function sendTextToHTML(text, htmlID) {
         return;
     }
     htmlElement.innerHTML = text;
-}
-
-function m_left(){
-    // vector delta with origin g_eye and end -> orthogonal through crossproduct of delta 
-    // delta = at - eye
-    // up = 
-    // left = crossproduct of delta and up
-}
-
-function m_right(){
-
-}
-
-function m_back(){
-
 }

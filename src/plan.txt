@@ -31,5 +31,26 @@ Additional reqs:
     - Texture on some objects and color on other. Objects working together: 0.5 pts
     - Multiple textures: 1 pt.
 
-
+0. Webserver
 1. Create a new attribute variable to store UV coordinates
+2. Load texture from the filesystem
+3. Pass the texture to the fragment shader
+4. Mix base color with texture color
+
+5. Include both view and projection matrices in your vertex shader
+6. Create a camera class to store and control both view and projection matrices
+7. Set view matrix using keyboard input
+8. Add ground
+9. Add skybox 
+10. Add Walls
+
+
+
+3A Goals:
+
+1. Have the ground created with a flattened cube and sky from a big cube
+2. Texture working on at least one object done
+3. Texture on some objects, colors on others done
+
+
+1 is finished, 2 is finished, 3 is finished.
