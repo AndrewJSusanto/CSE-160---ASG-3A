@@ -54,3 +54,15 @@ Additional reqs:
 
 
 1 is finished, 2 is finished, 3 is finished.
+
+3B Goals:
+
+1. Implement camera movement
+2. Key commands for rotation (Q and E for pan L/R)
+3. Perspective Camera implemented
+4. World is implemented that you can walk around (interesting enough)
+5. Rotate camera with the mouse
+6. Add and delete blocks
+7. Add simple story or game to the world (1 pt)
+8. Performance checks
+9. Wow factor (0.5 pt)

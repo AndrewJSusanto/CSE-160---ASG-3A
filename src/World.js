@@ -253,37 +253,6 @@ function addActionsForHTMLUI() {
         }
     })
 
-
-    // // Leg Segment Slider
-    // document.getElementById('legSlider').addEventListener('mousemove',
-    //     function() {g_legAngle = this.value; renderAllShapes(); });
-
-    // // Ear Segment Slider
-    // document.getElementById('earSlider').addEventListener('mousemove',
-    //     function() {g_earAngle = this.value; renderAllShapes(); })
-
-    // // Trunk Whole Slider
-    // document.getElementById('trunkSlider').addEventListener('mousemove',
-    //     function() {g_trunkAngle = this.value; renderAllShapes(); })
-
-    // // Trunk Segments Sliders
-    // document.getElementById('trunk1Slider').addEventListener('mousemove',
-    //     function() {g_trunk1Angle = this.value; renderAllShapes(); })
-    // document.getElementById('trunk2Slider').addEventListener('mousemove',
-    //     function() {g_trunk2Angle = this.value; renderAllShapes(); })
-    // document.getElementById('trunk3Slider').addEventListener('mousemove',
-    //     function() {g_trunk3Angle = this.value; renderAllShapes(); })
-
-    // // Tail Slider
-    // document.getElementById('tailSlider').addEventListener('mousemove',
-    //     function() {g_tailAngle = this.value; renderAllShapes(); })
-
-    // // Head Segment Slider
-    // document.getElementById('headSlider').addEventListener('mousemove',
-    //     function() {g_headAngle = this.value; renderAllShapes(); })
-
-    // Buttons
-    // idleButton
     idleAnimation = document.getElementById('idleButton');
     idleAnimation.addEventListener('click', function (e) {
         idleAnimate = true;
@@ -334,25 +303,30 @@ function keydown(ev) {
         case 87: // W
         case 38: // Up-arrow
             g_camera.m_forward();
-            console.log('up');
+            console.log('forward');
             break;
         case 65: // A
         case 37: // Left-arrow
             g_camera.m_left();
+            console.log('left');
             break;
         case 83: // S
         case 40: // Down-arrow
             g_camera.m_backward();
+            console.log('back');
             break;
         case 68: // D
         case 39: // Right-arrow
             g_camera.m_right();
+            console.log('right');
             break;
         case 81: // Q
             g_camera.m_panLeft();
+            console.log('l-pan');
             break;
         case 69: // E
             g_camera.m_panRight();
+            console.log('r-pan');
             break;
         default:
             break;
@@ -547,6 +521,7 @@ function renderScene() {
 
     var startTime = performance.now();
 
+    renderMap();
     renderAllShapes();
 
     var duration = performance.now() - startTime;
