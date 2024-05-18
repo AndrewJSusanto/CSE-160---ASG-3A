@@ -12,43 +12,17 @@
     <br>
     <div style="float: right; height: calc(100vh - 50px); padding-right: 50px">
       <p id="numdot"> numdot 0 ms: 0 fps: 0</p>
-      <p>Current Animation: <label id="currentAnimation">None</label></p>
-      <div id="wrapper">
-        <button type="button" id="idleButton" onclick="currentAnimation.innerText = this.innerText">Idle Animation</button>
-        <button type="button" id="flapButton" onclick="currentAnimation.innerText = this.innerText">Flying Animation</button>
-        <button type="button" id="clearButton" onclick="currentAnimation.innerText = 'None'">Clear Animations | Reset Sliders</button>
-      </div>
-      <p>
-        Camera Angle X: <label id="angleValue"> 0 </label>
-        <br>
-        Camera Angle Y: <label id="angleValueY"> 0 </label>
-      </p>
-      <p>Mousedown and Drag to rotate camera<br>WASD or Arrowkeys to move, Q and E to pan left and right, respectively.</p>
-      <!-- <p> Clear animations before adjusting any of the options below to prevent irregular movement.</p> -->
-      <!-- <form id="sliderForm">
-        <p>
-          Legs <input type="range" min="-50" max="50" value="-10" class="slider" id="legSlider">
-        </p>
-        <p>
-          Ears <input type="range" min="-50" max="50" value="40" class="slider" id="earSlider">
-        </p>
-        <p>
-          Trunk Whole <input type="range" min="-50" max="50" value="-20" class="slider" id="trunkSlider">
-        </p>
-        <p>
-          Trunk Segment 1 <input type="range" min="-50" max="50" value="-3" class="slider" id="trunk1Slider">
-        <br>
-          Trunk Segment 2 <input type="range" min="-50" max="50" value="-3" class="slider" id="trunk2Slider">
-        <br>
-          Trunk Segment 3 <input type="range" min="-50" max="50" value="-3" class="slider" id="trunk3Slider">
-        </p>
-        <p>
-          Tail <input type="range" min="-50" max="50" value="0" class="slider" id="tailSlider">
-        </p>
-        <p>
-          Head <input type="range" min="-50" max="50" value="0" class="slider" id="headSlider">
-        </p>
-      </form> -->
+      <br>
+      <p>Your goal is to collect all 4 diamond blocks in the maze and drop the blocks where they </p>
+      <p>belong in front of Happy the Elephant at the centre.</p>
+      <p>There are a total of 4 diamond blocks hidden throughout. Make sure to get all diamond blocks to the centre for a victory dance!</p>
+      <br>
+      <p>Mouse move to rotate camera <br>WASD or Arrowkeys to move, Q and E to pan left and right, respectively.</p>
+      <p>F to Pick up item at given index, G to drop item on player location.</p>
+
+      <p>Diamond Blocks in Inventory: <label id="inventoryValue"> 0 </label></p>
+      <p>Index in reach: <label id="reachIndex">x z</label></p>
+      <p>Diamonds can be found at (6, 6), (2, 16), (25, 29), (23, 10)</p>
       <br>
     </div>
      

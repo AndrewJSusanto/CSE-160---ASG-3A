@@ -1,8 +1,8 @@
 class Camera {
     constructor() {
         this.fov = 60;
-        this.eye =  new Vector3([0, 0.6, -3]);
-        this.at =   new Vector3([0, 0, 100]);
+        this.eye =  new Vector3([-14, 0.6, -14]);
+        this.at =   new Vector3([14, 0.6, -14]);
         this.up =   new Vector3([0, 1, 0]);
 
         this.projMat = new Matrix4();
@@ -16,6 +16,7 @@ class Camera {
             this.at.elements[0],     this.at.elements[1],     this.at.elements[2],
             this.up.elements[0],     this.up.elements[1],     this.up.elements[2]
         );
+
     }
 
     m_forward() {
@@ -26,8 +27,8 @@ class Camera {
         delta.set(this.at);
         delta.sub(this.eye);
         delta = delta.normalize();
-        this.eye    = this.eye.add(delta.mul(0.5));
-        this.at     = this.at.add(delta.mul(0.5));
+        this.eye    = this.eye.add(delta.mul(1));
+        this.at     = this.at.add(delta.mul(1));
         
         this.viewMat.setLookAt(
             this.eye.elements[0],    this.eye.elements[1],    this.eye.elements[2],
@@ -42,8 +43,8 @@ class Camera {
         delta.set(this.at);
         delta.sub(this.eye);
         delta = delta.normalize();
-        this.eye    = this.eye.sub(delta.mul(0.5));
-        this.at     = this.at.sub(delta.mul(0.5));
+        this.eye    = this.eye.sub(delta.mul(1));
+        this.at     = this.at.sub(delta.mul(1));
 
         this.viewMat.setLookAt(
             this.eye.elements[0],    this.eye.elements[1],    this.eye.elements[2],
@@ -61,8 +62,8 @@ class Camera {
         delta.mul(-1);
         // res = delta x up
         res = Vector3.cross(delta, this.up).normalize();
-        this.eye    = this.eye.add(res.mul(0.2));
-        this.at     = this.at.add(res.mul(0.2));
+        this.eye    = this.eye.add(res.mul(1));
+        this.at     = this.at.add(res.mul(1));
 
         this.viewMat.setLookAt(
             this.eye.elements[0],    this.eye.elements[1],    this.eye.elements[2],
@@ -83,8 +84,8 @@ class Camera {
 
         // res = -delta x up
         res = Vector3.cross(delta, this.up).normalize();
-        this.eye    = this.eye.add(res.mul(0.2));
-        this.at     = this.at.add(res.mul(0.2));
+        this.eye    = this.eye.add(res.mul(1));
+        this.at     = this.at.add(res.mul(1));
 
         this.viewMat.setLookAt(
             this.eye.elements[0],    this.eye.elements[1],    this.eye.elements[2],
@@ -93,7 +94,7 @@ class Camera {
         );
     }
 
-    m_panLeft() {
+    m_panLeft(deg) {
         var delta = new Vector3( [0, 0, 0] );
         var delta_prime = new Vector3( [0, 0, 0] );
         delta.set(this.at);
@@ -101,7 +102,8 @@ class Camera {
         var rotMat = new Matrix4();
 
         // set angle of rotation
-        rotMat.setRotate(10, this.up.elements[0], this.up.elements[1], this.up.elements[2]);
+        //rotMat.setRotate(10, this.up.elements[0], this.up.elements[1], this.up.elements[2]);
+        rotMat.setRotate(-deg, this.up.elements[0], this.up.elements[1], this.up.elements[2]);
         // apply rotation by multiplying rotation matrix with initial vector delta
         delta_prime = rotMat.multiplyVector3(delta);
         var temp = new Vector3( [0, 0, 0] );
@@ -115,7 +117,7 @@ class Camera {
         );
     }
 
-    m_panRight() {
+    m_panRight(deg) {
         var delta = new Vector3( [0, 0, 0] );
         var delta_prime = new Vector3( [0, 0, 0] );
         delta.set(this.at);
@@ -123,7 +125,8 @@ class Camera {
         var rotMat = new Matrix4();
 
         // set angle of rotation
-        rotMat.setRotate(-10, this.up.elements[0], this.up.elements[1], this.up.elements[2]);
+        //rotMat.setRotate(-10, this.up.elements[0], this.up.elements[1], this.up.elements[2]);
+        rotMat.setRotate(-deg, this.up.elements[0], this.up.elements[1], this.up.elements[2]);
         // apply rotation by multiplying rotation matrix with initial vector delta
         delta_prime = rotMat.multiplyVector3(delta);
         var temp = new Vector3( [0, 0, 0] );

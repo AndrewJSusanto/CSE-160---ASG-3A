@@ -67,6 +67,12 @@ let u_Sampler2;
 let u_whichTexture;
 let identityM;
 
+let inventory = 0;
+let mapX = 0;
+let mapZ = 0;
+let playerX = 0;
+let playerZ = 0;
+
 let cursorPosition = [0, 0];
 
 // camera rotation
@@ -76,6 +82,7 @@ let g_globalRot = 0;
 
 // perspective
 let g_camera;
+let g_currentAt;
 
 // block animal
 let idleAnimate = true;
@@ -196,53 +203,63 @@ function connectVariablesToGLSL() {
     gl.uniformMatrix4fv(u_ModelMatrix, false, identityM.elements);
 }
 
-function addActionsForHTMLUI() {
+function addActions() {
     // Mouse rotation
         // Track mousedown, mouseup, mousemove
-    var currpos = {
-        x: 0,
-        y: 0,
-    }
-    var downFlag = false;
     delta = 100;
-    var dx, dy = 0;
 
-    canvas.onmousedown = function (down) {
-        //console.log('Mouse Down')
-        downFlag = true;
-        let omd = convertCoordinatesEventToGL(down)
-        currpos.x = omd[0];
-        currpos.y = omd[1];
-        //console.log('x: ' + currpos.x + ' y: ' + currpos.y);
-    }
-    canvas.onmouseup = function (up) {
-        //console.log('Mouse Up')
-        downFlag = false;
-        // newpos = convertCoordinatesEventToGL(up);
-        // dx = newpos[0] - currpos.x;
-        // dy = newpos[1] - currpos.y;
-        // g_globalAngle += (dx * delta);
-        // console.log('New Angle' + g_globalAngle);
-    }
-    canvas.onmousemove = function (move) {
-        //console.log('Angle' + g_globalAngle);
-        if (!downFlag) {
-            return;
+    // pointerLock() 
+    canvas.addEventListener("click", () => {
+        canvas.requestPointerLock = canvas.requestPointerLock || canvas.mozRequestPointerLock;
+        canvas.requestPointerLock();
+    });
+
+    function lockChange() {
+        if (document.pointerLockElement === canvas || document.mozPointerLockElement === canvas) {
+            //downFlag = true;
+            document.addEventListener("mousemove", mouseMove, false);
         }
         else {
-            newpos = convertCoordinatesEventToGL(move);
-            dx = newpos[0] - currpos.x;
-            dy = newpos[1] - currpos.y;
-            g_globalAngle += (dx * delta);
-            g_globalAngleY += (dy * delta);
-            currpos.x = newpos[0];
-            currpos.y = newpos[1];
-            dx = 0;
-            dy = 0;
-            document.getElementById('angleValue').innerText = Math.abs(Math.floor(g_globalAngle) % 360);
-            document.getElementById('angleValueY').innerText = Math.abs(Math.floor(g_globalAngleY) % 360);
+            //downFlag = false;
+            document.removeEventListener("mousemove", mouseMove, false);
         }
     }
+
+    document.addEventListener('pointerlockchange', lockChange, false);
+    document.addEventListener('mozpointerlockchange', lockChange, false);
+    
+
+    function mouseMove(e) {
+        let deltaX = e.movementX || e.mozMovementX || 0;
+        // let deltaY = e.movementY || e.mozMovementY || 0;
+        newpos = convertCoordinatesEventToGL(e);
+
+        if(Math.sign(deltaX) == -1) {
+            g_camera.m_panRight(deltaX * 0.8);
+        }
+        else if (Math.sign(deltaX) == 1 && deltaX != 0) {
+            g_camera.m_panLeft(deltaX * 0.8);
+        }
+    }
+
+    // Pick up and drop block
+    // document.addEventListener("keydown", function (event) {
+    //     if(event.key === 'F' || event.key === 'f') {
+    //         let [mapX, mapZ] = mapIndex();
+    //         let [playerX, playerZ] = [Math.floor(g_camera.eye.elements[0]) + 16, Math.floor(g_camera.eye.elements[2]) + 16];
+    //         console.log(mapX, mapZ); // the vector length away from person.
+    //         console.log('Player map Index: ');
+    //         console.log(playerX, playerZ);
+    //         console.log('Removal Index: ');
+    //         console.log(playerX + mapX, playerZ + mapZ);
+    //         changeMap(playerX + mapX, playerZ + mapZ, 0);
+
+    //         // map[mapX][mapZ] = 
+    //         // 
+    //         // inventory += 1;
+    //     }
+    //     renderScene();
+    // })
 
     // Shift detection
     canvas.addEventListener("click", function (e) {
@@ -251,50 +268,68 @@ function addActionsForHTMLUI() {
             document.getElementById('currentAnimation').innerText = "You Can't See Me"
             document.getElementById('elephName').innerText = "JOHNNNNN CENAAAAAAA"
         }
-    })
+        let coords = convertCoordinatesEventToGL(e);
+        console.log(coords);
+        console.log(g_camera.at.elements);
+        // normalize the cam.eye and cam.at distances and take a block at the space in front of you
 
-    idleAnimation = document.getElementById('idleButton');
-    idleAnimation.addEventListener('click', function (e) {
-        idleAnimate = true;
-        if(flapAnimate) {
-            flapAnimate = false;
-        }
-        if(spinAnimate) {
-            spinAnimate = false;
-        }
+        
     })
+    document.getElementById('inventoryValue').innerText
+    // idleAnimation = document.getElementById('idleButton');
+    // idleAnimation.addEventListener('click', function (e) {
+    //     idleAnimate = true;
+    //     if(flapAnimate) {
+    //         flapAnimate = false;
+    //     }
+    //     if(spinAnimate) {
+    //         spinAnimate = false;
+    //     }
+    // })
     // flapButton
-    flapAnimation = document.getElementById('flapButton');
-    flapAnimation.addEventListener('click', function (e) {
-        flapAnimate = true;
-        if(idleAnimate) {
-            idleAnimate = false
-        }
-        if(spinAnimate) {
-            spinAnimate = false;
-        }
-    })
+    // flapAnimation = document.getElementById('flapButton');
+    // flapAnimation.addEventListener('click', function (e) {
+    //     flapAnimate = true;
+    //     if(idleAnimate) {
+    //         idleAnimate = false
+    //     }
+    //     if(spinAnimate) {
+    //         spinAnimate = false;
+    //     }
+    // })
     // clearAnimations
-    clearAnimations = document.getElementById('clearButton').addEventListener('click', function (e) {
-        flapAnimate = false;
-        idleAnimate = false;
-        spinAnimate = false;
+    // clearAnimations = document.getElementById('clearButton').addEventListener('click', function (e) {
+    //     flapAnimate = false;
+    //     idleAnimate = false;
+    //     spinAnimate = false;
 
-        g_legAngle = -10;
-        g_earAngle = 40;
-        g_trunkAngle = -20;
-        g_tailAngle = 0;
-        g_headAngle = 0;
-        g_testAngle = 0;
-        g_trunk1Angle = -3;
-        g_trunk2Angle = -3;
-        g_trunk3Angle = -3;
-            // leg, ear trunk, t1, t2, t3, tail, head, 
-        if(document.getElementById('sliderForm')) {
-            document.getElementById('sliderForm').reset();
-        }
-    })
+    //     g_legAngle = -10;
+    //     g_earAngle = 40;
+    //     g_trunkAngle = -20;
+    //     g_tailAngle = 0;
+    //     g_headAngle = 0;
+    //     g_testAngle = 0;
+    //     g_trunk1Angle = -3;
+    //     g_trunk2Angle = -3;
+    //     g_trunk3Angle = -3;
+    //         // leg, ear trunk, t1, t2, t3, tail, head, 
+    //     if(document.getElementById('sliderForm')) {
+    //         document.getElementById('sliderForm').reset();
+    //     }
+    // })
 
+}
+
+function mapIndex() {
+    let range = new Vector3();
+    range.set(g_camera.at);
+    range.sub(g_camera.eye);
+    range = range.normalize();
+    range.mul(3);
+    let x = Math.floor(range.elements[0]);
+    let z = Math.floor(range.elements[2]);
+    return [ x, z ];
+    
 }
 
 function keydown(ev) {
@@ -321,19 +356,51 @@ function keydown(ev) {
             console.log('right');
             break;
         case 81: // Q
-            g_camera.m_panLeft();
+            g_camera.m_panLeft(-10);
             console.log('l-pan');
             break;
         case 69: // E
-            g_camera.m_panRight();
+            g_camera.m_panRight(10);
             console.log('r-pan');
+            break;
+        case 70: // F
+            [mapX, mapZ] = mapIndex();
+            [playerX, playerZ] = [Math.floor(g_camera.eye.elements[0]) + 16, Math.floor(g_camera.eye.elements[2]) + 16];
+            console.log(mapX, mapZ); // the vector length away from person.
+            console.log('Player map Index: ');
+            console.log(playerX, playerZ);
+            console.log('Removal Index: ');
+            console.log(playerX + mapX, playerZ + mapZ);
+            changeMap(playerX + mapX, playerZ + mapZ, 0);
+            document.getElementById('inventoryValue').innerText = inventory;
+            document.getElementById('reachIndex').innerText = [playerX + mapX, playerZ + mapZ];
+            mapX = 0;
+            mapZ = 0;
+            playerX = 0;
+            playerZ = 0;
+            break;
+        case 71: // G
+            // if player is on [14-16][10-12] and presses G with inventory 4, player wins, trigger dance
+            [playerX, playerZ] = [Math.floor(g_camera.eye.elements[0]) + 16, Math.floor(g_camera.eye.elements[2]) + 16];
+            if (inventory == 0) {
+                break;
+            }
+            else if ((playerX >= 14 && playerX <= 16) && (playerZ >= 10 && playerZ <= 12) && inventory == 4) {
+                //within boundaries and inventory 4
+                // Victory spin
+                spinAnimate = true;
+            }
+            else {
+                console.log('Not in victory zone, dropping inventory')
+                changeMap(playerX, playerZ, 2);
+                document.getElementById('inventoryValue').innerText = inventory;
+            }
             break;
         default:
             break;
 
     }
     renderScene();
-    console.log(ev.keyCode);
 }
 function initTextures() {
     // initTextures + sendTextoGLSL takes a gl context, creates a texture, gets location...
@@ -458,11 +525,10 @@ function main() {
     setupWebGL();
     // Set up GLSL shader programs and connect GLSL variables
     connectVariablesToGLSL();
-    addActionsForHTMLUI();
+    addActions();
 
     g_camera = new Camera();
     document.onkeydown = keydown;
-
     // Initialize and load textures
     initTextures();
 
@@ -471,6 +537,12 @@ function main() {
     //renderScene();
     
     requestAnimationFrame(tick);
+}
+
+function check(ev) {
+    // get where your eye is, and where your eye is looking at. ignoring y axis, normalize the vector between
+    // eye and at, 
+
 }
 
 function click(ev) {
